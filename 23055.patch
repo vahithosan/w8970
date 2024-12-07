@@ -1,0 +1,101 @@
+diff -urN org/target/linux/lantiq/files/arch/mips/boot/dts/lantiq/vr9_tplink_tdw8970-16m.dts mod/target/linux/lantiq/files/arch/mips/boot/dts/lantiq/vr9_tplink_tdw8970-16m.dts
+--- org/target/linux/lantiq/files/arch/mips/boot/dts/lantiq/vr9_tplink_tdw8970-16m.dts	1970-01-01 02:00:00.000000000 +0200
++++ mod/target/linux/lantiq/files/arch/mips/boot/dts/lantiq/vr9_tplink_tdw8970-16m.dts	2024-12-06 09:53:02.923692751 +0300
+@@ -0,0 +1,32 @@
++/dts-v1/;
++
++#include "vr9_tplink_tdw89x0.dtsi"
++
++/ {
++	compatible = "tplink,tdw8970-16m", "tplink,tdw89x0", "lantiq,xway", "lantiq,vr9";
++	model = "TP-LINK TD-W8970-16M";
++};
++
++&spi {
++    flash@4 {
++        partitions {
++
++            partition@20000 {
++                reg = <0x20000 0xfa0000>;
++                label = "firmware";
++            };
++
++            partition@7c0000 {
++                reg = <0xfc0000 0x10000>;
++                label = "config";
++                read-only;
++            };
++
++            ath9k_cal: partition@7d0000 {
++                reg = <0xfd0000 0x30000>;
++                label = "boardconfig";
++                read-only;
++            };
++        };
++    };
++};
+diff -urN org/target/linux/lantiq/image/tp-link.mk mod/target/linux/lantiq/image/tp-link.mk
+--- org/target/linux/lantiq/image/tp-link.mk	2024-12-06 09:39:20.754884731 +0300
++++ mod/target/linux/lantiq/image/tp-link.mk	2024-12-06 09:54:56.891682056 +0300
+@@ -45,6 +45,19 @@
+ endef
+ TARGET_DEVICES += tplink_tdw8980
+ 
++define Device/tplink_tdw8970-16m
++  $(Device/lantiqTpLink)
++  DEVICE_MODEL := TD-W8970-16M
++  DEVICE_VARIANT := v1
++  TPLINK_FLASHLAYOUT := 16Mltq-8Mflsh
++  TPLINK_HWID := 0x89700001
++  TPLINK_HWREV := 1
++  IMAGE_SIZE := 15808k
++  DEVICE_PACKAGES:= kmod-ath9k wpad-basic-wolfssl kmod-usb-dwc2 kmod-usb-ledtrig-usbport
++  SUPPORTED_DEVICES += TDW8970-16M
++endef
++TARGET_DEVICES += tplink_tdw8970-16m
++
+ define Device/tplink_vr200
+   $(Device/dsa-migration)
+   $(Device/lantiqTpLink)
+diff -urN org/target/linux/lantiq/xrx200/base-files/etc/board.d/02_network mod/target/linux/lantiq/xrx200/base-files/etc/board.d/02_network
+--- org/target/linux/lantiq/xrx200/base-files/etc/board.d/02_network	2024-12-06 09:39:20.758217707 +0300
++++ mod/target/linux/lantiq/xrx200/base-files/etc/board.d/02_network	2024-12-06 09:56:44.403355167 +0300
+@@ -39,6 +39,7 @@
+ 	buffalo,wbmr-300hpd|\
+ 	tplink,tdw8970|\
+ 	tplink,tdw8980|\
++	tplink,tdw8970-16m|\
+ 	tplink,vr200|\
+ 	tplink,vr200v)
+ 		ucidef_set_interface_lan "lan1 lan2 lan3 lan4"
+diff -urN org/target/linux/lantiq/xrx200/base-files/etc/hotplug.d/firmware/12-ath9k-eeprom mod/target/linux/lantiq/xrx200/base-files/etc/hotplug.d/firmware/12-ath9k-eeprom
+--- org/target/linux/lantiq/xrx200/base-files/etc/hotplug.d/firmware/12-ath9k-eeprom	2024-12-06 09:39:20.758217707 +0300
++++ mod/target/linux/lantiq/xrx200/base-files/etc/hotplug.d/firmware/12-ath9k-eeprom	2024-12-06 09:58:07.080684323 +0300
+@@ -32,7 +32,8 @@
+ 				ath9k_patch_mac_crc $(macaddr_add $(mtd_get_mac_binary_ubi caldata 0x110c) 2) 0x10c
+ 				;;
+ 			tplink,tdw8970|\
+-			tplink,tdw8980)
++			tplink,tdw8980|\
++			tplink,tdw8970-16m)
+ 				caldata_extract "boardconfig" 0x21000 0x1000
+ 				;;
+ 			*)
+diff -urN org/tools/firmware-utils/Makefile mod/tools/firmware-utils/Makefile
+--- org/tools/firmware-utils/Makefile	2024-12-06 09:39:20.878204856 +0300
++++ mod/tools/firmware-utils/Makefile	2024-12-06 09:59:24.847825219 +0300
+@@ -10,10 +10,10 @@
+ PKG_RELEASE:=1
+ 
+ PKG_SOURCE_PROTO:=git
+-PKG_SOURCE_URL=$(PROJECT_GIT)/project/firmware-utils.git
+-PKG_SOURCE_DATE:=2024-09-22
+-PKG_SOURCE_VERSION:=f3b636d0ee478ee8d757cb42d469e0a40d07627a
+-PKG_MIRROR_HASH:=c60f97e2c48842dd5c8e55cb214ce1139fa7586cd22ca489d656320b06bbbe68
++PKG_SOURCE_URL=https://github.com/vahithosan/firmware-utils.git
++PKG_SOURCE_DATE:=2024-10-14
++PKG_SOURCE_VERSION:=42d0fef7b4e21cbc4de1f7e9a4142032e4fe7640
++PKG_MIRROR_HASH:=cd855126c258b7a85a2cf6bff8f2435a0bd0dd7d3017b65e3ef04735658c7c85
+ 
+ include $(INCLUDE_DIR)/host-build.mk
+ include $(INCLUDE_DIR)/cmake.mk
