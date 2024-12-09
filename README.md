@@ -36,4 +36,5 @@ mtd5: 00010000 00010000 "config"
 mtd6: 00030000 00010000 "boardconfig"
 root@OpenWrt:/#
 ```
-
+![Ekran1](https://github.com/vahithosan/w8970/blob/main/Screenshot%202024-12-08%20at%2014-40-54%20OpenWrt%20-%20LuCI.png)
+![Ekran2](https://github.com/vahithosan/w8970/blob/main/Screenshot%202024-12-08%20at%2014-41-27%20OpenWrt%20-%20LuCI.png)
